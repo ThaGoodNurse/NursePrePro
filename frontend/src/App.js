@@ -1648,58 +1648,45 @@ function App() {
     );
   };
 
-  const renderPaymentSuccess = () => (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-16">
-      <div className="container mx-auto px-4 max-w-2xl text-center">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="mb-6">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h1>
-            <p className="text-lg text-gray-600">
-              Welcome to NursePrep Pro! Your subscription is now active.
-            </p>
-          </div>
-          
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold text-green-800 mb-2">What's Next?</h3>
-            <ul className="text-sm text-green-700 space-y-1 text-left">
-              <li>• Access unlimited NCLEX practice questions</li>
-              <li>• Use advanced study modes (Adaptive, Timed, Simulation)</li>
-              <li>• Track your progress with detailed analytics</li>
-              <li>• Study with spaced repetition flashcards</li>
-            </ul>
-          </div>
-          
-          <div className="space-y-4">
-            <Button 
-              onClick={() => {
-                setCurrentView('dashboard');
-                setActiveTab('quizzes');
-              }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Brain className="mr-2 h-4 w-4" />
-              Start Studying
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => {
-                setCurrentView('dashboard');
-                setActiveTab('flashcards');
-              }}
-              className="w-full"
-            >
-              <BookOpen className="mr-2 h-4 w-4" />
-              Study Flashcards
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Render based on current view
+  if (currentView === 'quiz') {
+    return (
+      <>
+        {renderQuiz()}
+        <PaymentDialog />
+      </>
+    );
+  } else if (currentView === 'results') {
+    return (
+      <>
+        {renderResults()}
+        <PaymentDialog />
+      </>
+    );
+  } else if (currentView === 'flashcards') {
+    return (
+      <>
+        {renderFlashcards()}
+        <PaymentDialog />
+      </>
+    );
+  } else if (currentView === 'flashcard-results') {
+    return (
+      <>
+        {renderFlashcardResults()}
+        <PaymentDialog />
+      </>
+    );
+  } else if (currentView === 'payment-success') {
+    return renderPaymentSuccess();
+  } else {
+    return (
+      <>
+        {renderDashboard()}
+        <PaymentDialog />
+      </>
+    );
+  }
 }
 
 export default App;
