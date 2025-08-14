@@ -128,6 +128,91 @@ function App() {
     }
   };
 
+  const fetchSubscriptionStatus = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/subscription/status`);
+      setSubscriptionStatus(response.data);
+    } catch (error) {
+      console.error('Error fetching subscription status:', error);
+    }
+  };
+
+  const fetchSubscriptionPackages = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/packages`);
+      setSubscriptionPackages(response.data.packages);
+    } catch (error) {
+      console.error('Error fetching subscription packages:', error);
+    }
+  };
+
+  const checkPaymentReturn = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    
+    if (sessionId) {
+      pollPaymentStatus(sessionId);
+    }
+  };
+
+  const pollPaymentStatus = async (sessionId, attempts = 0) => {
+    const maxAttempts = 5;
+    const pollInterval = 2000; // 2 seconds
+
+    if (attempts >= maxAttempts) {
+      console.error('Payment status check timed out');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/payments/checkout/status/${sessionId}`);
+      
+      if (response.data.payment_status === 'paid') {
+        // Payment successful - refresh subscription status
+        await fetchSubscriptionStatus();
+        // Show success message or redirect
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setCurrentView('payment-success');
+        return;
+      } else if (response.data.status === 'expired') {
+        console.error('Payment session expired');
+        return;
+      }
+
+      // Continue polling if payment is still pending
+      setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), pollInterval);
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+    }
+  };
+
+  const initiatePayment = async (packageId) => {
+    if (!packageId) return;
+    
+    setPaymentLoading(true);
+    try {
+      const originUrl = window.location.origin;
+      
+      const response = await axios.post(`${BACKEND_URL}/api/payments/checkout/session`, {
+        package_id: packageId,
+        origin_url: originUrl
+      });
+
+      if (response.data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = response.data.url;
+      } else if (response.data.success) {
+        // Free trial activated
+        await fetchSubscriptionStatus();
+        setShowPaymentDialog(false);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
   const handleTimeUp = () => {
     if (currentView === 'quiz') {
       submitQuiz(true); // Auto-submit when time is up
