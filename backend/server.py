@@ -15,6 +15,10 @@ from emergentintegrations.payments.stripe.checkout import StripeCheckout, Checko
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.environ.get("DB_NAME", "nurseprep_db")
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "*").split(",")
+STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
+
+if not STRIPE_API_KEY:
+    print("Warning: STRIPE_API_KEY not found in environment variables")
 
 # MongoDB setup
 client = MongoClient(MONGO_URL)
