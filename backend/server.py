@@ -154,6 +154,25 @@ class CreateFlashcardSetRequest(BaseModel):
     description: str
     category: str
     color: str = "#3B82F6"
+    spaced_repetition_enabled: bool = True
+
+class CreateQuestionRequest(BaseModel):
+    question_text: str
+    question_type: str = "multiple_choice"
+    options: List[str]
+    correct_answer_index: Optional[int] = None
+    correct_answer_indices: Optional[List[int]] = None  # For multiple response
+    correct_answer_text: Optional[str] = None  # For fill-in-blank
+    explanation: Optional[str] = None
+    rationale: Optional[str] = None
+    difficulty: str = "medium"
+    cognitive_level: str = "application"
+    nclex_category: str = "physiological_integrity"
+    nclex_subcategory: Optional[str] = None
+    client_needs: Optional[str] = None
+    priority_level: str = "medium"
+    area_id: str
+    time_limit: Optional[int] = 60
 
 class CreateFlashcardRequest(BaseModel):
     term: str
@@ -167,7 +186,16 @@ class CreateFlashcardRequest(BaseModel):
 
 class FlashcardReviewRequest(BaseModel):
     card_id: str
-    known: bool  # True if user knows the card, False if they need to review it
+    quality: int  # 0-5 for SM-2 algorithm (0=total blackout, 5=perfect response)
+    response_time: float  # time taken to answer in seconds
+
+class StartQuizRequest(BaseModel):
+    area_id: Optional[str] = None
+    quiz_type: str = "practice"  # practice, adaptive, timed, nclex_simulation
+    question_count: int = 10
+    time_limit: Optional[int] = None  # total time in minutes
+    difficulty_level: Optional[str] = "adaptive"  # easy, medium, hard, adaptive
+    nclex_categories: Optional[List[str]] = None
 
 class QuizAnswerRequest(BaseModel):
     question_id: str
