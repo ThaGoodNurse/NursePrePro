@@ -2,14 +2,17 @@ import requests
 import sys
 import json
 from datetime import datetime
+import time
 
 class NursePrepAPITester:
     def __init__(self, base_url="https://nurseprep-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
-        self.quiz_id = None
         self.study_areas = []
+        self.flashcard_sets = []
+        self.sample_questions = []
+        self.sample_flashcards = []
 
     def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
         """Run a single API test"""
