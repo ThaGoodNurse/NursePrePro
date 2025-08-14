@@ -421,53 +421,127 @@ async def create_flashcard(request: CreateFlashcardRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Flashcard Study endpoints
-@app.post("/api/flashcards/study")
-async def start_flashcard_study(set_id: str, shuffle: bool = True):
-    """Start a flashcard study session"""
+# Flashcard Study endpoints with Spaced Repetition
+@app.post("/api/flashcards/study-spaced")
+async def start_spaced_repetition_study(set_id: str, max_cards: int = 20):
+    """Start a spaced repetition study session"""
     try:
-        # Get flashcards from the set
-        flashcards = list(flashcards_collection.find(
-            {"set_id": set_id}, 
-            {"_id": 0}
-        ))
+        current_time = datetime.utcnow()
         
-        if not flashcards:
+        # Get cards due for review (next_review is None or <= current_time)
+        due_cards = list(flashcards_collection.find({
+            "set_id": set_id,
+            "$or": [
+                {"next_review": {"$lte": current_time}},
+                {"next_review": None}
+            ]
+        }, {"_id": 0}).limit(max_cards))
+        
+        # If not enough due cards, add some new cards
+        if len(due_cards) < max_cards:
+            new_cards_needed = max_cards - len(due_cards)
+            new_cards = list(flashcards_collection.find({
+                "set_id": set_id,
+                "review_count": 0
+            }, {"_id": 0}).limit(new_cards_needed))
+            due_cards.extend(new_cards)
+        
+        if not due_cards:
+            # No cards to review, get any cards from the set
+            due_cards = list(flashcards_collection.find(
+                {"set_id": set_id}, 
+                {"_id": 0}
+            ).limit(max_cards))
+        
+        if not due_cards:
             raise HTTPException(status_code=404, detail="No flashcards found for this set")
         
-        # Shuffle if requested
-        if shuffle:
-            import random
-            random.shuffle(flashcards)
+        # Sort by priority (overdue cards first, then by difficulty)
+        def card_priority(card):
+            if card.get("next_review"):
+                days_overdue = (current_time - card["next_review"]).days
+                return (-days_overdue, card.get("success_rate", 0))
+            return (0, card.get("success_rate", 0))
+        
+        due_cards.sort(key=card_priority, reverse=True)
         
         study_session = FlashcardStudySession(
             set_id=set_id,
             cards_studied=[],
-            correct_cards=[]
+            correct_cards=[],
+            session_type="spaced_repetition"
         )
         
         flashcard_sessions_collection.insert_one(study_session.model_dump())
         
         return {
             "session_id": study_session.id,
-            "flashcards": flashcards,
-            "total_cards": len(flashcards)
+            "flashcards": due_cards,
+            "total_cards": len(due_cards),
+            "session_type": "spaced_repetition",
+            "due_cards_count": len([c for c in due_cards if c.get("next_review") and c["next_review"] <= current_time])
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/flashcards/study/{session_id}/review")
-async def review_flashcard(session_id: str, review: FlashcardReviewRequest):
-    """Mark a flashcard as known or unknown"""
+@app.post("/api/flashcards/study/{session_id}/review-spaced")
+async def review_flashcard_spaced(session_id: str, review: FlashcardReviewRequest):
+    """Review a flashcard with spaced repetition algorithm"""
     try:
         # Get session
         session = flashcard_sessions_collection.find_one({"id": session_id}, {"_id": 0})
         if not session:
             raise HTTPException(status_code=404, detail="Study session not found")
         
+        # Get flashcard
+        card = flashcards_collection.find_one({"id": review.card_id}, {"_id": 0})
+        if not card:
+            raise HTTPException(status_code=404, detail="Flashcard not found")
+        
+        # Apply SM-2 algorithm
+        current_ef = card.get("easiness_factor", 2.5)
+        current_interval = card.get("interval", 1)
+        current_reps = card.get("repetitions", 0)
+        
+        new_interval, new_ef, new_reps = calculate_next_interval(
+            review.quality, current_ef, current_interval, current_reps
+        )
+        
+        # Calculate next review date
+        next_review_date = datetime.utcnow() + timedelta(days=new_interval)
+        
+        # Update success rate and response time
+        old_success_rate = card.get("success_rate", 0.0)
+        old_avg_time = card.get("average_response_time", 0.0)
+        review_count = card.get("review_count", 0)
+        
+        # New success rate (weighted average)
+        success = 1.0 if review.quality >= 3 else 0.0
+        new_success_rate = (old_success_rate * review_count + success) / (review_count + 1)
+        
+        # New average response time
+        new_avg_time = (old_avg_time * review_count + review.response_time) / (review_count + 1)
+        
+        # Update flashcard
+        flashcards_collection.update_one(
+            {"id": review.card_id},
+            {
+                "$set": {
+                    "easiness_factor": new_ef,
+                    "interval": new_interval,
+                    "repetitions": new_reps,
+                    "last_reviewed": datetime.utcnow(),
+                    "next_review": next_review_date,
+                    "review_count": review_count + 1,
+                    "success_rate": new_success_rate,
+                    "average_response_time": new_avg_time
+                }
+            }
+        )
+        
         # Update session
         update_data = {"$addToSet": {"cards_studied": review.card_id}}
-        if review.known:
+        if review.quality >= 3:  # Consider it "known" if quality is 3 or higher
             update_data["$addToSet"]["correct_cards"] = review.card_id
         
         flashcard_sessions_collection.update_one(
@@ -475,7 +549,44 @@ async def review_flashcard(session_id: str, review: FlashcardReviewRequest):
             update_data
         )
         
-        return {"message": "Review recorded", "known": review.known}
+        return {
+            "message": "Review recorded",
+            "quality": review.quality,
+            "next_review_in_days": new_interval,
+            "next_review_date": next_review_date.isoformat(),
+            "easiness_factor": new_ef,
+            "success_rate": new_success_rate,
+            "is_mastered": new_success_rate > 0.8 and new_interval > 30
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/flashcards/{set_id}/due-count")
+async def get_due_cards_count(set_id: str):
+    """Get count of cards due for review"""
+    try:
+        current_time = datetime.utcnow()
+        
+        due_count = flashcards_collection.count_documents({
+            "set_id": set_id,
+            "$or": [
+                {"next_review": {"$lte": current_time}},
+                {"next_review": None}
+            ]
+        })
+        
+        total_count = flashcards_collection.count_documents({"set_id": set_id})
+        new_cards = flashcards_collection.count_documents({
+            "set_id": set_id,
+            "review_count": 0
+        })
+        
+        return {
+            "due_count": due_count,
+            "total_count": total_count,
+            "new_cards": new_cards,
+            "review_cards": due_count - new_cards
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
