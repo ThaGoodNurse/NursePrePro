@@ -32,15 +32,27 @@ app.add_middleware(
 class QuestionOption(BaseModel):
     id: str
     text: str
+    is_correct: Optional[bool] = False
 
 class Question(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     question_text: str
+    question_type: str = "multiple_choice"  # multiple_choice, multiple_response, fill_blank, hot_spot, drag_drop
     options: List[QuestionOption]
-    correct_answer_id: str
+    correct_answer_id: Optional[str] = None
+    correct_answer_ids: Optional[List[str]] = None  # For multiple response
+    correct_answer_text: Optional[str] = None  # For fill-in-blank
     explanation: Optional[str] = None
+    rationale: Optional[str] = None
     difficulty: str = "medium"  # easy, medium, hard
+    cognitive_level: str = "application"  # knowledge, comprehension, application, analysis, synthesis, evaluation
+    nclex_category: str = "physiological_integrity"
+    nclex_subcategory: Optional[str] = None
+    client_needs: Optional[str] = None
+    priority_level: str = "medium"  # low, medium, high, critical
     area_id: str
+    time_limit: Optional[int] = 60  # seconds
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Flashcard(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -52,6 +64,15 @@ class Flashcard(BaseModel):
     examples: Optional[List[str]] = None
     set_id: str
     difficulty: str = "medium"
+    # Spaced Repetition Fields
+    easiness_factor: float = 2.5  # SM-2 algorithm
+    interval: int = 1  # days until next review
+    repetitions: int = 0
+    last_reviewed: Optional[datetime] = None
+    next_review: Optional[datetime] = None
+    review_count: int = 0
+    success_rate: float = 0.0
+    average_response_time: float = 0.0
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class FlashcardSet(BaseModel):
@@ -61,6 +82,7 @@ class FlashcardSet(BaseModel):
     category: str
     color: str = "#3B82F6"
     card_count: int = 0
+    spaced_repetition_enabled: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class FlashcardStudySession(BaseModel):
@@ -69,8 +91,33 @@ class FlashcardStudySession(BaseModel):
     cards_studied: List[str]  # flashcard IDs
     correct_cards: List[str]  # flashcard IDs marked as known
     session_duration: Optional[int] = None  # in seconds
+    session_type: str = "normal"  # normal, spaced_repetition, review
     started_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None
+
+class NCLEXQuizAttempt(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    quiz_type: str = "practice"  # practice, adaptive, timed, nclex_simulation
+    questions: List[str]  # question IDs
+    answers: Dict[str, Any]  # question_id -> answer data
+    score: int
+    total_questions: int
+    time_limit: Optional[int] = None  # total time in seconds
+    time_taken: Optional[int] = None  # actual time taken
+    difficulty_level: float = 0.0  # adaptive difficulty
+    nclex_categories_performance: Dict[str, float] = {}
+    started_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+
+class UserCompetency(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = "default_user"  # For future user system
+    area_id: str
+    nclex_category: str
+    competency_level: float = 0.5  # 0.0 to 1.0
+    question_count: int = 0
+    correct_count: int = 0
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
 
 class StudyArea(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
