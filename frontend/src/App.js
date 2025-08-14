@@ -693,7 +693,10 @@ function App() {
               <Brain className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-800">NursePrep Pro™</h1>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-4xl font-bold text-gray-800">NursePrep Pro™</h1>
+                {getSubscriptionBadge()}
+              </div>
               <p className="text-xs text-gray-500 mt-1">© 2025 NursePrep Pro. All rights reserved.</p>
             </div>
           </div>
@@ -704,6 +707,26 @@ function App() {
             <p>NCLEX-RN® is a registered trademark of NCSBN. Not affiliated with NCSBN.</p>
             <p>Educational use only - Not medical advice</p>
           </div>
+          
+          {/* Subscription Status */}
+          {subscriptionStatus && !subscriptionStatus.active && (
+            <div className="mt-6">
+              <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-left">
+                      <h3 className="font-semibold text-gray-800">Unlock Premium Features</h3>
+                      <p className="text-sm text-gray-600">Get unlimited access to all NCLEX prep tools</p>
+                    </div>
+                    <Button onClick={() => setShowPaymentDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Upgrade Now
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
 
         {/* Enhanced Stats Overview */}
