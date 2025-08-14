@@ -672,6 +672,187 @@ async def startup_event():
             
             questions_collection.insert_many(sample_questions)
         
+        # Create sample flashcard sets if none exist
+        if flashcard_sets_collection.count_documents({}) == 0:
+            medical_terminology_set = {
+                "id": str(uuid.uuid4()),
+                "name": "Medical Terminology Essentials",
+                "description": "Common medical prefixes, suffixes, and root words",
+                "category": "Medical Terminology",
+                "color": "#059669",
+                "card_count": 0
+            }
+            
+            anatomy_set = {
+                "id": str(uuid.uuid4()),
+                "name": "Anatomy & Physiology Terms",
+                "description": "Essential anatomical and physiological terminology",
+                "category": "Anatomy",
+                "color": "#7C3AED",
+                "card_count": 0
+            }
+            
+            pharmacology_set = {
+                "id": str(uuid.uuid4()),
+                "name": "Pharmacology Terms",
+                "description": "Drug classifications and pharmacological terminology",
+                "category": "Pharmacology",
+                "color": "#DC2626",
+                "card_count": 0
+            }
+            
+            flashcard_sets_collection.insert_many([medical_terminology_set, anatomy_set, pharmacology_set])
+            
+            # Create sample flashcards for Medical Terminology
+            sample_flashcards = [
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Tachycardia",
+                    "definition": "Rapid heart rate, typically over 100 beats per minute",
+                    "pronunciation": "tak-ih-KAR-dee-ah",
+                    "word_type": "term",
+                    "category": "Cardiovascular",
+                    "examples": ["The patient presented with tachycardia and shortness of breath"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "medium",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Bradycardia",
+                    "definition": "Slow heart rate, typically under 60 beats per minute",
+                    "pronunciation": "brad-ih-KAR-dee-ah",
+                    "word_type": "term",
+                    "category": "Cardiovascular",
+                    "examples": ["The athlete showed bradycardia at rest"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "medium",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Hypertension",
+                    "definition": "High blood pressure, typically 140/90 mmHg or higher",
+                    "pronunciation": "hahy-per-TEN-shuhn",
+                    "word_type": "term",
+                    "category": "Cardiovascular",
+                    "examples": ["Patient has a history of hypertension requiring medication"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "easy",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Hypotension",
+                    "definition": "Low blood pressure, typically below 90/60 mmHg",
+                    "pronunciation": "hahy-poh-TEN-shuhn",
+                    "word_type": "term",
+                    "category": "Cardiovascular",
+                    "examples": ["Hypotension can cause dizziness and fainting"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "easy",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Dyspnea",
+                    "definition": "Difficulty breathing or shortness of breath",
+                    "pronunciation": "DISP-nee-ah",
+                    "word_type": "term",
+                    "category": "Respiratory",
+                    "examples": ["The patient complained of dyspnea on exertion"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "medium",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Apnea",
+                    "definition": "Temporary cessation of breathing",
+                    "pronunciation": "AP-nee-ah",
+                    "word_type": "term",
+                    "category": "Respiratory",
+                    "examples": ["Sleep apnea is a common breathing disorder"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "medium",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Cardi/o",
+                    "definition": "Heart (combining form)",
+                    "pronunciation": "KAR-dee-oh",
+                    "word_type": "root",
+                    "category": "Root Words",
+                    "examples": ["Cardiology", "Cardiomyopathy", "Electrocardiogram"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "easy",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Pneum/o",
+                    "definition": "Lung, air (combining form)",
+                    "pronunciation": "NEW-moh",
+                    "word_type": "root",
+                    "category": "Root Words",
+                    "examples": ["Pneumonia", "Pneumothorax", "Pneumology"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "medium",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "-itis",
+                    "definition": "Inflammation (suffix)",
+                    "pronunciation": "EYE-tis",
+                    "word_type": "suffix",
+                    "category": "Suffixes",
+                    "examples": ["Arthritis", "Bronchitis", "Gastritis"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "easy",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "-ectomy",
+                    "definition": "Surgical removal (suffix)",
+                    "pronunciation": "EK-toh-mee",
+                    "word_type": "suffix",
+                    "category": "Suffixes",
+                    "examples": ["Appendectomy", "Tonsillectomy", "Hysterectomy"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "medium",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Pre-",
+                    "definition": "Before, in front of (prefix)",
+                    "pronunciation": "pree",
+                    "word_type": "prefix",
+                    "category": "Prefixes",
+                    "examples": ["Preoperative", "Prenatal", "Premedication"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "easy",
+                    "created_at": datetime.utcnow()
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "term": "Post-",
+                    "definition": "After, behind (prefix)",
+                    "pronunciation": "pohst",
+                    "word_type": "prefix",
+                    "category": "Prefixes",
+                    "examples": ["Postoperative", "Postpartum", "Postmortem"],
+                    "set_id": medical_terminology_set["id"],
+                    "difficulty": "easy",
+                    "created_at": datetime.utcnow()
+                }
+            ]
+            
+            flashcards_collection.insert_many(sample_flashcards)
+        
         print("Sample data initialized successfully")
     except Exception as e:
         print(f"Error initializing sample data: {e}")
