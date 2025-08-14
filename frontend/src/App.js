@@ -256,6 +256,12 @@ function App() {
     return null;
   };
 
+  const handleTimeUp = () => {
+    if (currentView === 'quiz') {
+      submitQuiz(true); // Auto-submit when time is up
+    }
+  };
+
   // Advanced Quiz functions
   const startAdvancedQuiz = async (settings) => {
     setLoading(true);
