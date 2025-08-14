@@ -516,56 +516,109 @@ async def get_flashcard_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Quiz endpoints
-@app.post("/api/quiz/start")
-async def start_quiz(area_id: str, question_count: int = 10):
-    """Start a new quiz for a study area"""
+# Quiz endpoints with advanced features
+@app.post("/api/quiz/start-advanced")
+async def start_advanced_quiz(request: StartQuizRequest):
+    """Start an advanced quiz with adaptive difficulty, timing, and NCLEX simulation"""
     try:
-        # Get random questions from the area
-        questions = list(questions_collection.aggregate([
-            {"$match": {"area_id": area_id}},
-            {"$sample": {"size": question_count}}
-        ]))
+        questions = []
+        
+        if request.quiz_type == "adaptive":
+            # Get user competency for adaptive difficulty
+            competency = user_competency_collection.find_one(
+                {"area_id": request.area_id}, {"_id": 0}
+            )
+            competency_level = competency["competency_level"] if competency else 0.5
+            
+            questions = select_adaptive_questions(
+                request.area_id, competency_level, request.question_count
+            )
+        
+        elif request.quiz_type == "nclex_simulation":
+            # NCLEX-style adaptive test
+            categories = request.nclex_categories or [
+                "safe_effective_care", "health_promotion", 
+                "psychosocial_integrity", "physiological_integrity"
+            ]
+            
+            questions_per_category = max(1, request.question_count // len(categories))
+            for category in categories:
+                cat_questions = list(questions_collection.find(
+                    {"nclex_category": category},
+                    {"_id": 0}
+                ).limit(questions_per_category))
+                questions.extend(cat_questions)
+        
+        elif request.quiz_type == "timed":
+            # Regular timed quiz
+            questions = list(questions_collection.aggregate([
+                {"$match": {"area_id": request.area_id}},
+                {"$sample": {"size": request.question_count}}
+            ]))
+        
+        else:
+            # Standard practice quiz
+            questions = list(questions_collection.aggregate([
+                {"$match": {"area_id": request.area_id}},
+                {"$sample": {"size": request.question_count}}
+            ]))
         
         if not questions:
-            raise HTTPException(status_code=404, detail="No questions found for this area")
+            raise HTTPException(status_code=404, detail="No questions found")
         
-        quiz_attempt = QuizAttempt(
-            area_id=area_id,
+        # Calculate total time limit
+        total_time_limit = None
+        if request.time_limit:
+            total_time_limit = request.time_limit * 60  # convert to seconds
+        elif request.quiz_type in ["timed", "nclex_simulation"]:
+            # Default time limits
+            total_time_limit = sum(q.get("time_limit", 60) for q in questions)
+        
+        quiz_attempt = NCLEXQuizAttempt(
+            quiz_type=request.quiz_type,
             questions=[q["id"] for q in questions],
             answers={},
             score=0,
             total_questions=len(questions),
-            started_at=datetime.utcnow()
+            time_limit=total_time_limit,
+            difficulty_level=0.5
         )
         
-        quiz_attempts_collection.insert_one(quiz_attempt.model_dump())
+        nclex_quiz_attempts_collection.insert_one(quiz_attempt.model_dump())
         
-        # Return questions without correct answers
+        # Return questions without correct answers for security
         safe_questions = []
         for q in questions:
             safe_q = {
                 "id": q["id"],
                 "question_text": q["question_text"],
+                "question_type": q.get("question_type", "multiple_choice"),
                 "options": q["options"],
-                "difficulty": q["difficulty"]
+                "difficulty": q["difficulty"],
+                "cognitive_level": q.get("cognitive_level", "application"),
+                "nclex_category": q.get("nclex_category", "physiological_integrity"),
+                "time_limit": q.get("time_limit", 60)
             }
             safe_questions.append(safe_q)
         
         return {
             "quiz_id": quiz_attempt.id,
             "questions": safe_questions,
-            "total_questions": len(questions)
+            "total_questions": len(questions),
+            "quiz_type": request.quiz_type,
+            "time_limit": total_time_limit,
+            "adaptive_mode": request.quiz_type == "adaptive"
         }
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/quiz/{quiz_id}/submit")
-async def submit_quiz(quiz_id: str, answers: List[QuizAnswerRequest]):
-    """Submit quiz answers and get results"""
+@app.post("/api/quiz/{quiz_id}/submit-advanced")
+async def submit_advanced_quiz(quiz_id: str, answers: List[Dict[str, Any]], time_taken: Optional[int] = None):
+    """Submit advanced quiz with detailed analysis"""
     try:
         # Get quiz attempt
-        quiz = quiz_attempts_collection.find_one({"id": quiz_id}, {"_id": 0})
+        quiz = nclex_quiz_attempts_collection.find_one({"id": quiz_id}, {"_id": 0})
         if not quiz:
             raise HTTPException(status_code=404, detail="Quiz not found")
         
@@ -576,56 +629,141 @@ async def submit_quiz(quiz_id: str, answers: List[QuizAnswerRequest]):
             {"_id": 0}
         ))
         
-        # Calculate score
+        # Analyze answers
         correct_count = 0
         results = []
-        answer_dict = {ans.question_id: ans.selected_option_id for ans in answers}
+        nclex_performance = {}
+        answer_dict = {ans["question_id"]: ans for ans in answers}
         
         for question in questions:
-            selected_option_id = answer_dict.get(question["id"])
-            is_correct = selected_option_id == question["correct_answer_id"]
+            user_answer = answer_dict.get(question["id"], {})
+            is_correct = False
+            
+            # Check answer based on question type
+            if question.get("question_type") == "multiple_choice":
+                is_correct = user_answer.get("selected_option_id") == question["correct_answer_id"]
+            elif question.get("question_type") == "multiple_response":
+                selected_ids = set(user_answer.get("selected_option_ids", []))
+                correct_ids = set(question.get("correct_answer_ids", []))
+                is_correct = selected_ids == correct_ids
+            elif question.get("question_type") == "fill_blank":
+                user_text = user_answer.get("answer_text", "").strip().lower()
+                correct_text = question.get("correct_answer_text", "").strip().lower()
+                is_correct = user_text == correct_text
             
             if is_correct:
                 correct_count += 1
             
-            # Find selected option text
-            selected_option_text = None
-            correct_option_text = None
-            
-            for option in question["options"]:
-                if option["id"] == selected_option_id:
-                    selected_option_text = option["text"]
-                if option["id"] == question["correct_answer_id"]:
-                    correct_option_text = option["text"]
+            # Track NCLEX category performance
+            category = question.get("nclex_category", "physiological_integrity")
+            if category not in nclex_performance:
+                nclex_performance[category] = {"correct": 0, "total": 0}
+            nclex_performance[category]["total"] += 1
+            if is_correct:
+                nclex_performance[category]["correct"] += 1
             
             results.append({
                 "question_id": question["id"],
                 "question_text": question["question_text"],
-                "selected_option": selected_option_text,
-                "correct_option": correct_option_text,
+                "question_type": question.get("question_type", "multiple_choice"),
                 "is_correct": is_correct,
-                "explanation": question.get("explanation")
+                "user_answer": user_answer,
+                "correct_answer": {
+                    "correct_answer_id": question.get("correct_answer_id"),
+                    "correct_answer_ids": question.get("correct_answer_ids"),
+                    "correct_answer_text": question.get("correct_answer_text")
+                },
+                "explanation": question.get("explanation"),
+                "rationale": question.get("rationale"),
+                "nclex_category": category,
+                "cognitive_level": question.get("cognitive_level", "application"),
+                "time_spent": user_answer.get("time_spent", 0)
             })
         
-        # Update quiz attempt
+        # Calculate scores and performance metrics
         score_percentage = int((correct_count / len(questions)) * 100)
-        quiz_attempts_collection.update_one(
+        
+        # Calculate NCLEX category percentages
+        for category in nclex_performance:
+            perf = nclex_performance[category]
+            perf["percentage"] = (perf["correct"] / perf["total"]) * 100 if perf["total"] > 0 else 0
+        
+        # Update quiz attempt
+        nclex_quiz_attempts_collection.update_one(
             {"id": quiz_id},
             {
                 "$set": {
-                    "answers": answer_dict,
+                    "answers": {ans["question_id"]: ans for ans in answers},
                     "score": score_percentage,
+                    "time_taken": time_taken,
+                    "nclex_categories_performance": nclex_performance,
                     "completed_at": datetime.utcnow()
                 }
             }
         )
         
+        # Update user competency if it's a practice or adaptive quiz
+        if quiz["quiz_type"] in ["practice", "adaptive"]:
+            for question in questions:
+                area_id = question["area_id"]
+                category = question.get("nclex_category", "physiological_integrity")
+                
+                # Update or create competency record
+                competency = user_competency_collection.find_one({
+                    "area_id": area_id, 
+                    "nclex_category": category
+                })
+                
+                if competency:
+                    new_correct = competency["correct_count"]
+                    new_total = competency["question_count"]
+                    
+                    # Add current question result
+                    is_correct = any(r["is_correct"] for r in results if r["question_id"] == question["id"])
+                    if is_correct:
+                        new_correct += 1
+                    new_total += 1
+                    
+                    new_competency = new_correct / new_total if new_total > 0 else 0.5
+                    
+                    user_competency_collection.update_one(
+                        {"area_id": area_id, "nclex_category": category},
+                        {
+                            "$set": {
+                                "competency_level": new_competency,
+                                "correct_count": new_correct,
+                                "question_count": new_total,
+                                "last_updated": datetime.utcnow()
+                            }
+                        }
+                    )
+                else:
+                    # Create new competency record
+                    is_correct = any(r["is_correct"] for r in results if r["question_id"] == question["id"])
+                    user_competency_collection.insert_one({
+                        "id": str(uuid.uuid4()),
+                        "user_id": "default_user",
+                        "area_id": area_id,
+                        "nclex_category": category,
+                        "competency_level": 1.0 if is_correct else 0.0,
+                        "question_count": 1,
+                        "correct_count": 1 if is_correct else 0,
+                        "last_updated": datetime.utcnow()
+                    })
+        
         return {
             "score": score_percentage,
             "correct_answers": correct_count,
             "total_questions": len(questions),
-            "results": results
+            "time_taken": time_taken,
+            "time_limit": quiz.get("time_limit"),
+            "quiz_type": quiz["quiz_type"],
+            "nclex_performance": nclex_performance,
+            "results": results,
+            "passed": score_percentage >= 75,  # NCLEX passing threshold
+            "competency_updated": quiz["quiz_type"] in ["practice", "adaptive"]
         }
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
