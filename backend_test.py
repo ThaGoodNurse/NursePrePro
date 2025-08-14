@@ -413,6 +413,63 @@ class NursePrepAPITester:
         
         return all_success
 
+    def test_payment_system(self):
+        """Test payment and subscription system"""
+        print("\n💳 Testing Payment System...")
+        
+        # Test getting subscription packages
+        packages_success, packages_response = self.run_test(
+            "Get Subscription Packages",
+            "GET",
+            "api/packages",
+            200
+        )
+        
+        if packages_success and 'packages' in packages_response:
+            packages = packages_response['packages']
+            print(f"   Found {len(packages)} subscription packages")
+            
+            # Test each package type
+            for package_id, package_info in packages.items():
+                print(f"     {package_id}: ${package_info['amount']} - {package_info['name']}")
+        
+        # Test subscription status
+        status_success, status_response = self.run_test(
+            "Get Subscription Status",
+            "GET",
+            "api/subscription/status",
+            200
+        )
+        
+        if status_success:
+            print(f"   Active subscription: {status_response.get('active', False)}")
+            print(f"   Subscription type: {status_response.get('subscription_type', 'None')}")
+            print(f"   Trial available: {status_response.get('trial_available', False)}")
+        
+        # Test free trial activation (if available)
+        if status_response.get('trial_available', False):
+            trial_data = {
+                "package_id": "trial",
+                "origin_url": "https://test.example.com"
+            }
+            
+            trial_success, trial_response = self.run_test(
+                "Activate Free Trial",
+                "POST",
+                "api/payments/checkout/session",
+                200,
+                data=trial_data
+            )
+            
+            if trial_success:
+                print(f"   Trial activation: {trial_response.get('success', False)}")
+                if trial_response.get('subscription_id'):
+                    print(f"   Subscription ID: {trial_response['subscription_id']}")
+            
+            return packages_success and status_success and trial_success
+        
+        return packages_success and status_success
+
     def test_statistics(self):
         """Test statistics endpoints"""
         print("\n📊 Testing Statistics...")
