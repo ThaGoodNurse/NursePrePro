@@ -831,15 +831,22 @@ function App() {
                         areaId={area.id} 
                         areaName={area.name}
                         onStart={startAdvancedQuiz}
+                        isPremium={!hasActiveSubscription()}
                       />
                       <Button 
                         variant="outline"
-                        onClick={() => startAdvancedQuiz({ 
-                          areaId: area.id, 
-                          quizType: 'practice', 
-                          questionCount: 5,
-                          difficultyLevel: 'medium' 
-                        })} 
+                        onClick={() => {
+                          if (!canAccessFeature('basic_quiz')) {
+                            setShowPaymentDialog(true);
+                            return;
+                          }
+                          startAdvancedQuiz({ 
+                            areaId: area.id, 
+                            quizType: 'practice', 
+                            questionCount: 5,
+                            difficultyLevel: 'medium' 
+                          });
+                        }} 
                         className="w-full"
                         disabled={area.question_count === 0}
                       >
