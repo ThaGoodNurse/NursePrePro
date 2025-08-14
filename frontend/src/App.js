@@ -264,6 +264,12 @@ function App() {
 
   // Advanced Quiz functions
   const startAdvancedQuiz = async (settings) => {
+    // Check if user has access to advanced features
+    if (!canAccessFeature('advanced_quiz') && settings.quizType !== 'practice') {
+      setShowPaymentDialog(true);
+      return;
+    }
+    
     setLoading(true);
     try {
       const response = await axios.post(`${BACKEND_URL}/api/quiz/start-advanced`, {
