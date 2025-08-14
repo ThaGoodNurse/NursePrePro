@@ -355,7 +355,257 @@ def select_adaptive_questions(area_id, competency_level, count=10):
 
 @app.get("/")
 async def root():
-    return {"message": "NursePrep API is running"}
+    return {"message": "NursePrep Pro API is running"}
+
+# Payment endpoints
+@app.get("/api/packages")
+async def get_subscription_packages():
+    """Get available subscription packages"""
+    return {"packages": SUBSCRIPTION_PACKAGES}
+
+@app.post("/api/payments/checkout/session")
+async def create_checkout_session(request: CheckoutRequest):
+    """Create Stripe checkout session for subscription"""
+    try:
+        if not STRIPE_API_KEY:
+            raise HTTPException(status_code=500, detail="Payment system not configured")
+        
+        # Validate package
+        if request.package_id not in SUBSCRIPTION_PACKAGES:
+            raise HTTPException(status_code=400, detail="Invalid package selected")
+        
+        package = SUBSCRIPTION_PACKAGES[request.package_id]
+        
+        # Skip payment for free trial
+        if package["amount"] == 0.00:
+            # Create free trial subscription directly
+            trial_subscription = UserSubscription(
+                subscription_type="trial",
+                expires_at=datetime.utcnow() + timedelta(days=7)
+            )
+            user_subscriptions_collection.insert_one(trial_subscription.model_dump())
+            
+            return {
+                "success": True,
+                "subscription_id": trial_subscription.id,
+                "message": "Free trial activated",
+                "expires_at": trial_subscription.expires_at.isoformat()
+            }
+        
+        # Create Stripe checkout session for paid packages
+        base_url = request.origin_url.rstrip('/')
+        success_url = f"{base_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+        cancel_url = f"{base_url}/payment-cancelled"
+        
+        # Initialize Stripe checkout
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{base_url}/api/webhook/stripe")
+        
+        checkout_request = CheckoutSessionRequest(
+            amount=package["amount"],
+            currency=package["currency"],
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "package_id": request.package_id,
+                "package_name": package["name"],
+                "user_id": "default_user"
+            }
+        )
+        
+        session_response = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        # Create payment transaction record
+        payment_transaction = PaymentTransaction(
+            session_id=session_response.session_id,
+            package_id=request.package_id,
+            package_name=package["name"],
+            amount=package["amount"],
+            currency=package["currency"],
+            payment_status="pending",
+            checkout_status="initiated",
+            metadata=checkout_request.metadata,
+            expires_at=datetime.utcnow() + timedelta(hours=24)
+        )
+        
+        payment_transactions_collection.insert_one(payment_transaction.model_dump())
+        
+        return {
+            "url": session_response.url,
+            "session_id": session_response.session_id
+        }
+        
+    except Exception as e:
+        print(f"Checkout session error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/payments/checkout/status/{session_id}")
+async def get_checkout_status(session_id: str):
+    """Get payment status and update subscription"""
+    try:
+        if not STRIPE_API_KEY:
+            raise HTTPException(status_code=500, detail="Payment system not configured")
+        
+        # Get payment transaction
+        transaction = payment_transactions_collection.find_one({"session_id": session_id}, {"_id": 0})
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Payment session not found")
+        
+        # Check with Stripe
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
+        checkout_status = await stripe_checkout.get_checkout_status(session_id)
+        
+        # Update transaction status
+        update_data = {
+            "checkout_status": checkout_status.status,
+            "payment_status": checkout_status.payment_status,
+            "updated_at": datetime.utcnow()
+        }
+        
+        payment_transactions_collection.update_one(
+            {"session_id": session_id},
+            {"$set": update_data}
+        )
+        
+        # If payment is successful and we haven't processed it yet
+        if (checkout_status.payment_status == "paid" and 
+            transaction["payment_status"] != "paid"):
+            
+            # Create subscription
+            package = SUBSCRIPTION_PACKAGES[transaction["package_id"]]
+            
+            # Calculate expiration date
+            expires_at = None
+            if package["duration_days"]:
+                expires_at = datetime.utcnow() + timedelta(days=package["duration_days"])
+            
+            subscription = UserSubscription(
+                subscription_type=transaction["package_id"],
+                expires_at=expires_at,
+                auto_renew=transaction["package_id"] in ["monthly", "annual"]
+            )
+            
+            user_subscriptions_collection.insert_one(subscription.model_dump())
+            
+            # Update transaction as paid
+            payment_transactions_collection.update_one(
+                {"session_id": session_id},
+                {"$set": {"payment_status": "paid"}}
+            )
+        
+        return {
+            "status": checkout_status.status,
+            "payment_status": checkout_status.payment_status,
+            "amount_total": checkout_status.amount_total,
+            "currency": checkout_status.currency,
+            "metadata": checkout_status.metadata
+        }
+        
+    except Exception as e:
+        print(f"Checkout status error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhooks"""
+    try:
+        if not STRIPE_API_KEY:
+            raise HTTPException(status_code=500, detail="Payment system not configured")
+        
+        body = await request.body()
+        signature = request.headers.get("Stripe-Signature")
+        
+        if not signature:
+            raise HTTPException(status_code=400, detail="Missing Stripe signature")
+        
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        
+        # Process webhook events
+        if webhook_response.event_type == "checkout.session.completed":
+            session_id = webhook_response.session_id
+            
+            # Update payment transaction
+            payment_transactions_collection.update_one(
+                {"session_id": session_id},
+                {"$set": {
+                    "payment_status": "paid",
+                    "checkout_status": "complete",
+                    "updated_at": datetime.utcnow()
+                }}
+            )
+            
+            # Get transaction to create subscription
+            transaction = payment_transactions_collection.find_one({"session_id": session_id}, {"_id": 0})
+            if transaction:
+                package = SUBSCRIPTION_PACKAGES[transaction["package_id"]]
+                
+                expires_at = None
+                if package["duration_days"]:
+                    expires_at = datetime.utcnow() + timedelta(days=package["duration_days"])
+                
+                subscription = UserSubscription(
+                    subscription_type=transaction["package_id"],
+                    expires_at=expires_at,
+                    auto_renew=transaction["package_id"] in ["monthly", "annual"]
+                )
+                
+                user_subscriptions_collection.insert_one(subscription.model_dump())
+        
+        return {"received": True}
+        
+    except Exception as e:
+        print(f"Stripe webhook error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/subscription/status")
+async def get_subscription_status(user_id: str = "default_user"):
+    """Get current user subscription status"""
+    try:
+        subscription = user_subscriptions_collection.find_one(
+            {"user_id": user_id, "status": "active"},
+            {"_id": 0},
+            sort=[("created_at", -1)]
+        )
+        
+        if not subscription:
+            return {
+                "active": False,
+                "subscription_type": None,
+                "expires_at": None,
+                "trial_available": True
+            }
+        
+        # Check if subscription is expired
+        if subscription.get("expires_at"):
+            expires_at = subscription["expires_at"]
+            if isinstance(expires_at, str):
+                expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+            
+            if expires_at < datetime.utcnow():
+                # Mark as expired
+                user_subscriptions_collection.update_one(
+                    {"id": subscription["id"]},
+                    {"$set": {"status": "expired", "updated_at": datetime.utcnow()}}
+                )
+                
+                return {
+                    "active": False,
+                    "subscription_type": subscription["subscription_type"],
+                    "expires_at": expires_at.isoformat(),
+                    "trial_available": subscription["subscription_type"] != "trial"
+                }
+        
+        return {
+            "active": True,
+            "subscription_type": subscription["subscription_type"],
+            "expires_at": subscription.get("expires_at").isoformat() if subscription.get("expires_at") else None,
+            "auto_renew": subscription.get("auto_renew", False),
+            "trial_available": False
+        }
+        
+    except Exception as e:
+        print(f"Subscription status error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Study Areas endpoints
 @app.get("/api/study-areas")
