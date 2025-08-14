@@ -42,6 +42,36 @@ class Question(BaseModel):
     difficulty: str = "medium"  # easy, medium, hard
     area_id: str
 
+class Flashcard(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    term: str
+    definition: str
+    pronunciation: Optional[str] = None
+    word_type: Optional[str] = None  # prefix, suffix, root, term
+    category: Optional[str] = None
+    examples: Optional[List[str]] = None
+    set_id: str
+    difficulty: str = "medium"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class FlashcardSet(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    category: str
+    color: str = "#3B82F6"
+    card_count: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class FlashcardStudySession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    set_id: str
+    cards_studied: List[str]  # flashcard IDs
+    correct_cards: List[str]  # flashcard IDs marked as known
+    session_duration: Optional[int] = None  # in seconds
+    started_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+
 class StudyArea(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
