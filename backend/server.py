@@ -126,6 +126,35 @@ class UserCompetency(BaseModel):
     correct_count: int = 0
     last_updated: datetime = Field(default_factory=datetime.utcnow)
 
+class PaymentTransaction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    user_id: Optional[str] = "default_user"
+    user_email: Optional[str] = None
+    package_id: str
+    package_name: str
+    amount: float
+    currency: str = "usd"
+    payment_status: str = "pending"  # pending, paid, failed, expired
+    checkout_status: str = "initiated"  # initiated, complete, expired
+    stripe_payment_intent_id: Optional[str] = None
+    metadata: Optional[Dict[str, str]] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: Optional[datetime] = None
+
+class UserSubscription(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = "default_user"
+    user_email: Optional[str] = None
+    subscription_type: str  # trial, monthly, annual, lifetime
+    status: str = "active"  # active, inactive, expired, cancelled
+    started_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: Optional[datetime] = None
+    auto_renew: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
 class StudyArea(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
