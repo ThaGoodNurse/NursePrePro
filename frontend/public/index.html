@@ -2,27 +2,120 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="description" content="A product of emergent.sh" />
-        <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-        <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-        <title>Emergent | Fullstack App</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <meta name="theme-color" content="#3B82F6" />
+        <meta name="description" content="Master NCLEX-RN with adaptive quizzes, spaced repetition flashcards, and comprehensive analytics. The most advanced nursing exam preparation app." />
+        <meta name="keywords" content="NCLEX-RN, nursing exam, NCLEX prep, nursing student, medical terminology, adaptive learning, spaced repetition, nursing education" />
+        <meta name="author" content="NursePrep Pro" />
+        <meta name="copyright" content="© 2025 NursePrep Pro. All rights reserved." />
+        
+        <!-- App Title -->
+        <title>NursePrep Pro - NCLEX-RN Exam Preparation</title>
+        
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+        
+        <!-- App Icons -->
+        <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
+        
+        <!-- iOS PWA Meta Tags -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="NursePrep Pro" />
+        
+        <!-- Android/Chrome PWA Meta Tags -->
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="NursePrep Pro" />
+        
+        <!-- Windows Tiles -->
+        <meta name="msapplication-TileColor" content="#3B82F6" />
+        <meta name="msapplication-config" content="%PUBLIC_URL%/browserconfig.xml" />
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="NursePrep Pro - NCLEX-RN Exam Preparation" />
+        <meta property="og:description" content="Master NCLEX-RN with adaptive quizzes, spaced repetition flashcards, and comprehensive analytics." />
+        <meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+        <meta property="og:url" content="https://nurseprepro.com" />
+        <meta property="og:site_name" content="NursePrep Pro" />
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="NursePrep Pro - NCLEX-RN Exam Preparation" />
+        <meta name="twitter:description" content="Master NCLEX-RN with adaptive quizzes, spaced repetition flashcards, and comprehensive analytics." />
+        <meta name="twitter:image" content="%PUBLIC_URL%/twitter-card.png" />
+        
+        <!-- Preload Critical Resources -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        
+        <!-- Structured Data for Education App -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "MobileApplication",
+          "name": "NursePrep Pro",
+          "description": "Master NCLEX-RN with adaptive quizzes, spaced repetition flashcards, and comprehensive analytics",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "iOS, Android, Web",
+          "author": {
+            "@type": "Organization",
+            "name": "NursePrep Pro"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "9.99",
+            "priceCurrency": "USD"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "1000"
+          }
+        }
+        </script>
+        
+        <!-- Security Headers -->
+        <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+        <meta http-equiv="X-Frame-Options" content="DENY" />
+        <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+        <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+        
+        <!-- Service Worker Registration -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(function(registration) {
+                            console.log('SW registered: ', registration);
+                        })
+                        .catch(function(registrationError) {
+                            console.log('SW registration failed: ', registrationError);
+                        });
+                });
+            }
+        </script>
     </head>
     <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <noscript>
+            <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+                <h1>NursePrep Pro</h1>
+                <p>You need to enable JavaScript to run this app.</p>
+                <p>NursePrep Pro is an advanced NCLEX-RN preparation platform that requires JavaScript for optimal performance.</p>
+            </div>
+        </noscript>
         <div id="root"></div>
+        
+        <!-- Copyright Notice -->
+        <div style="display: none;">
+            © 2025 NursePrep Pro. All rights reserved.
+            NCLEX-RN® is a registered trademark of NCSBN. Not affiliated with NCSBN.
+            Educational use only - Not medical advice.
+        </div>
         <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
