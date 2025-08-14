@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 
 class NursePrepAPITester:
-    def __init__(self, base_url="https://nurseprep-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://ad26c181-45a9-4cac-bd86-b5e22309edce.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
