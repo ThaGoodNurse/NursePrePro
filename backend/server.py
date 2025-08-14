@@ -233,6 +233,13 @@ class StartQuizRequest(BaseModel):
     difficulty_level: Optional[str] = "adaptive"  # easy, medium, hard, adaptive
     nclex_categories: Optional[List[str]] = None
 
+class CheckoutRequest(BaseModel):
+    package_id: str
+    origin_url: str
+
+class CheckoutStatusRequest(BaseModel):
+    session_id: str
+
 class QuizAnswerRequest(BaseModel):
     question_id: str
     selected_option_id: str
