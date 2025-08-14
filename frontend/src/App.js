@@ -64,6 +64,12 @@ function App() {
   const [competencyData, setCompetencyData] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Subscription & Payment state
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [subscriptionPackages, setSubscriptionPackages] = useState({});
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
   useEffect(() => {
     fetchStudyAreas();
     fetchFlashcardSets();
