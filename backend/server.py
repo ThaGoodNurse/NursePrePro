@@ -130,6 +130,9 @@ class QuizAnswerRequest(BaseModel):
 study_areas_collection = db.study_areas
 questions_collection = db.questions
 quiz_attempts_collection = db.quiz_attempts
+flashcard_sets_collection = db.flashcard_sets
+flashcards_collection = db.flashcards
+flashcard_sessions_collection = db.flashcard_sessions
 
 @app.get("/")
 async def root():
