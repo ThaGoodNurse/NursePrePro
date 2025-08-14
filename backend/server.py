@@ -213,6 +213,167 @@ async def create_question(request: CreateQuestionRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Flashcard Sets endpoints
+@app.get("/api/flashcard-sets")
+async def get_flashcard_sets():
+    """Get all flashcard sets with card counts"""
+    try:
+        sets = list(flashcard_sets_collection.find({}, {"_id": 0}))
+        
+        # Update card counts
+        for flashcard_set in sets:
+            count = flashcards_collection.count_documents({"set_id": flashcard_set["id"]})
+            flashcard_set["card_count"] = count
+            
+        return {"flashcard_sets": sets}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/flashcard-sets")
+async def create_flashcard_set(request: CreateFlashcardSetRequest):
+    """Create a new flashcard set"""
+    try:
+        flashcard_set = FlashcardSet(
+            name=request.name,
+            description=request.description,
+            category=request.category,
+            color=request.color
+        )
+        
+        flashcard_sets_collection.insert_one(flashcard_set.model_dump())
+        return {"message": "Flashcard set created", "set": flashcard_set}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Flashcards endpoints
+@app.get("/api/flashcard-sets/{set_id}/flashcards")
+async def get_flashcards_by_set(set_id: str, limit: int = 50):
+    """Get flashcards for a specific set"""
+    try:
+        flashcards = list(flashcards_collection.find(
+            {"set_id": set_id}, 
+            {"_id": 0}
+        ).limit(limit))
+        
+        return {"flashcards": flashcards}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/flashcards")
+async def create_flashcard(request: CreateFlashcardRequest):
+    """Create a new flashcard"""
+    try:
+        flashcard = Flashcard(
+            term=request.term,
+            definition=request.definition,
+            pronunciation=request.pronunciation,
+            word_type=request.word_type,
+            category=request.category,
+            examples=request.examples or [],
+            set_id=request.set_id,
+            difficulty=request.difficulty
+        )
+        
+        flashcards_collection.insert_one(flashcard.model_dump())
+        return {"message": "Flashcard created", "flashcard": flashcard}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Flashcard Study endpoints
+@app.post("/api/flashcards/study")
+async def start_flashcard_study(set_id: str, shuffle: bool = True):
+    """Start a flashcard study session"""
+    try:
+        # Get flashcards from the set
+        flashcards = list(flashcards_collection.find(
+            {"set_id": set_id}, 
+            {"_id": 0}
+        ))
+        
+        if not flashcards:
+            raise HTTPException(status_code=404, detail="No flashcards found for this set")
+        
+        # Shuffle if requested
+        if shuffle:
+            import random
+            random.shuffle(flashcards)
+        
+        study_session = FlashcardStudySession(
+            set_id=set_id,
+            cards_studied=[],
+            correct_cards=[]
+        )
+        
+        flashcard_sessions_collection.insert_one(study_session.model_dump())
+        
+        return {
+            "session_id": study_session.id,
+            "flashcards": flashcards,
+            "total_cards": len(flashcards)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/flashcards/study/{session_id}/review")
+async def review_flashcard(session_id: str, review: FlashcardReviewRequest):
+    """Mark a flashcard as known or unknown"""
+    try:
+        # Get session
+        session = flashcard_sessions_collection.find_one({"id": session_id}, {"_id": 0})
+        if not session:
+            raise HTTPException(status_code=404, detail="Study session not found")
+        
+        # Update session
+        update_data = {"$addToSet": {"cards_studied": review.card_id}}
+        if review.known:
+            update_data["$addToSet"]["correct_cards"] = review.card_id
+        
+        flashcard_sessions_collection.update_one(
+            {"id": session_id},
+            update_data
+        )
+        
+        return {"message": "Review recorded", "known": review.known}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/flashcards/stats")
+async def get_flashcard_stats():
+    """Get flashcard study statistics"""
+    try:
+        # Get completed sessions
+        sessions = list(flashcard_sessions_collection.find({}, {"_id": 0}))
+        
+        if not sessions:
+            return {
+                "total_sessions": 0,
+                "total_cards_studied": 0,
+                "average_accuracy": 0,
+                "recent_sessions": []
+            }
+        
+        total_cards_studied = sum(len(session.get("cards_studied", [])) for session in sessions)
+        total_correct = sum(len(session.get("correct_cards", [])) for session in sessions)
+        
+        average_accuracy = (total_correct / total_cards_studied * 100) if total_cards_studied > 0 else 0
+        
+        # Get set names for recent sessions
+        for session in sessions[-5:]:
+            flashcard_set = flashcard_sets_collection.find_one(
+                {"id": session["set_id"]}, 
+                {"_id": 0, "name": 1}
+            )
+            session["set_name"] = flashcard_set["name"] if flashcard_set else "Unknown"
+        
+        return {
+            "total_sessions": len(sessions),
+            "total_cards_studied": total_cards_studied,
+            "average_accuracy": round(average_accuracy, 1),
+            "recent_sessions": sessions[-5:]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Quiz endpoints
 @app.post("/api/quiz/start")
 async def start_quiz(area_id: str, question_count: int = 10):
