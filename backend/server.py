@@ -102,6 +102,26 @@ class CreateQuestionRequest(BaseModel):
     difficulty: str = "medium"
     area_id: str
 
+class CreateFlashcardSetRequest(BaseModel):
+    name: str
+    description: str
+    category: str
+    color: str = "#3B82F6"
+
+class CreateFlashcardRequest(BaseModel):
+    term: str
+    definition: str
+    pronunciation: Optional[str] = None
+    word_type: Optional[str] = None
+    category: Optional[str] = None
+    examples: Optional[List[str]] = None
+    set_id: str
+    difficulty: str = "medium"
+
+class FlashcardReviewRequest(BaseModel):
+    card_id: str
+    known: bool  # True if user knows the card, False if they need to review it
+
 class QuizAnswerRequest(BaseModel):
     question_id: str
     selected_option_id: str
