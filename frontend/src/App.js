@@ -213,10 +213,47 @@ function App() {
     }
   };
 
-  const handleTimeUp = () => {
-    if (currentView === 'quiz') {
-      submitQuiz(true); // Auto-submit when time is up
+  const hasActiveSubscription = () => {
+    return subscriptionStatus?.active || false;
+  };
+
+  const canAccessFeature = (feature) => {
+    if (!subscriptionStatus) return false;
+    
+    // Free trial or paid subscription can access all features
+    if (subscriptionStatus.active) return true;
+    
+    // Free users have limited access
+    if (feature === 'basic_quiz') return true;
+    if (feature === 'basic_flashcards') return true;
+    
+    return false;
+  };
+
+  const getSubscriptionBadge = () => {
+    if (!subscriptionStatus) return null;
+    
+    if (subscriptionStatus.active) {
+      const type = subscriptionStatus.subscription_type;
+      const badgeConfig = {
+        trial: { label: 'Free Trial', color: 'bg-blue-100 text-blue-700', icon: Gift },
+        monthly: { label: 'Pro Monthly', color: 'bg-green-100 text-green-700', icon: Crown },
+        annual: { label: 'Pro Annual', color: 'bg-purple-100 text-purple-700', icon: Crown },
+        lifetime: { label: 'Lifetime Pro', color: 'bg-yellow-100 text-yellow-700', icon: Star }
+      };
+      
+      const config = badgeConfig[type] || badgeConfig.trial;
+      const IconComponent = config.icon;
+      
+      return (
+        <Badge className={`${config.color} border-0`}>
+          <IconComponent className="w-3 h-3 mr-1" />
+          {config.label}
+        </Badge>
+      );
     }
+    
+    return null;
   };
 
   // Advanced Quiz functions
