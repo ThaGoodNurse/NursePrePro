@@ -630,6 +630,60 @@ function App() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Footer with Legal Links */}
+        <footer className="mt-16 py-8 border-t border-gray-200 bg-white/50">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-4">NursePrep Pro™</h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  Advanced NCLEX-RN preparation platform with adaptive learning technology.
+                </p>
+                <p className="text-xs text-gray-500">
+                  © 2025 NursePrep Pro. All rights reserved.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-gray-800 mb-4">Legal</h4>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li><a href="#" className="hover:text-blue-600">Terms of Service</a></li>
+                  <li><a href="#" className="hover:text-blue-600">Privacy Policy</a></li>
+                  <li><a href="#" className="hover:text-blue-600">Cookie Policy</a></li>
+                  <li><a href="#" className="hover:text-blue-600">License Agreement</a></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-gray-800 mb-4">Support</h4>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li><a href="#" className="hover:text-blue-600">Help Center</a></li>
+                  <li><a href="#" className="hover:text-blue-600">Contact Support</a></li>
+                  <li><a href="#" className="hover:text-blue-600">Report Issue</a></li>
+                  <li><a href="#" className="hover:text-blue-600">About</a></li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+              <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                <div className="text-xs text-gray-500">
+                  <p>NCLEX-RN® is a registered trademark of the National Council of State Boards of Nursing, Inc. (NCSBN).</p>
+                  <p>NursePrep Pro is not affiliated with, endorsed by, or sponsored by NCSBN.</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Badge variant="outline" className="text-xs">
+                    Educational Use Only
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    Not Medical Advice
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
