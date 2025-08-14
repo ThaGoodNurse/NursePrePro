@@ -253,6 +253,40 @@ user_competency_collection = db.user_competency
 flashcard_sets_collection = db.flashcard_sets
 flashcards_collection = db.flashcards
 flashcard_sessions_collection = db.flashcard_sessions
+payment_transactions_collection = db.payment_transactions
+user_subscriptions_collection = db.user_subscriptions
+
+# Subscription packages - NEVER accept amounts from frontend
+SUBSCRIPTION_PACKAGES = {
+    "trial": {
+        "name": "7-Day Free Trial",
+        "amount": 0.00,
+        "currency": "usd",
+        "duration_days": 7,
+        "description": "Full access for 7 days - no credit card required"
+    },
+    "monthly": {
+        "name": "Monthly Subscription",
+        "amount": 9.99,
+        "currency": "usd", 
+        "duration_days": 30,
+        "description": "Monthly access to all NCLEX-RN prep features"
+    },
+    "annual": {
+        "name": "Annual Subscription", 
+        "amount": 79.99,
+        "currency": "usd",
+        "duration_days": 365,
+        "description": "Best value - 33% savings on annual plan"
+    },
+    "lifetime": {
+        "name": "Lifetime Access",
+        "amount": 199.99,
+        "currency": "usd",
+        "duration_days": None,  # Lifetime
+        "description": "One-time payment for unlimited access"
+    }
+}
 
 # Spaced Repetition Algorithm (SM-2)
 def calculate_next_interval(quality, easiness_factor, interval, repetitions):
