@@ -205,9 +205,76 @@ class QuizAnswerRequest(BaseModel):
 study_areas_collection = db.study_areas
 questions_collection = db.questions
 quiz_attempts_collection = db.quiz_attempts
+nclex_quiz_attempts_collection = db.nclex_quiz_attempts
+user_competency_collection = db.user_competency
 flashcard_sets_collection = db.flashcard_sets
 flashcards_collection = db.flashcards
 flashcard_sessions_collection = db.flashcard_sessions
+
+# Spaced Repetition Algorithm (SM-2)
+def calculate_next_interval(quality, easiness_factor, interval, repetitions):
+    """Calculate next review interval using SM-2 algorithm"""
+    if quality >= 3:
+        if repetitions == 0:
+            interval = 1
+        elif repetitions == 1:
+            interval = 6
+        else:
+            interval = round(interval * easiness_factor)
+        repetitions += 1
+    else:
+        repetitions = 0
+        interval = 1
+    
+    # Update easiness factor
+    easiness_factor = easiness_factor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+    if easiness_factor < 1.3:
+        easiness_factor = 1.3
+    
+    return interval, easiness_factor, repetitions
+
+# Adaptive Difficulty Algorithm
+def calculate_user_competency(user_performance):
+    """Calculate user competency level based on recent performance"""
+    if not user_performance:
+        return 0.5  # neutral starting point
+    
+    recent_scores = user_performance[-10:]  # last 10 attempts
+    weights = [i + 1 for i in range(len(recent_scores))]  # more weight to recent
+    
+    weighted_sum = sum(score * weight for score, weight in zip(recent_scores, weights))
+    weight_sum = sum(weights)
+    
+    return weighted_sum / weight_sum if weight_sum > 0 else 0.5
+
+def select_adaptive_questions(area_id, competency_level, count=10):
+    """Select questions based on user competency level"""
+    # Define difficulty ranges based on competency
+    if competency_level < 0.3:
+        difficulty_weights = {"easy": 0.7, "medium": 0.3, "hard": 0.0}
+    elif competency_level < 0.7:
+        difficulty_weights = {"easy": 0.2, "medium": 0.6, "hard": 0.2}
+    else:
+        difficulty_weights = {"easy": 0.1, "medium": 0.3, "hard": 0.6}
+    
+    questions = []
+    for difficulty, weight in difficulty_weights.items():
+        question_count = max(1, int(count * weight))
+        area_questions = list(questions_collection.find(
+            {"area_id": area_id, "difficulty": difficulty},
+            {"_id": 0}
+        ).limit(question_count))
+        questions.extend(area_questions)
+    
+    # Fill remaining slots if needed
+    if len(questions) < count:
+        additional = list(questions_collection.find(
+            {"area_id": area_id},
+            {"_id": 0}
+        ).limit(count - len(questions)))
+        questions.extend(additional)
+    
+    return questions[:count]
 
 @app.get("/")
 async def root():
