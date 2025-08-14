@@ -604,7 +604,7 @@ function App() {
     </Dialog>
   );
 
-  const QuizSettingsDialog = ({ areaId, areaName, onStart }) => {
+  const QuizSettingsDialog = ({ areaId, areaName, onStart, isPremium = false }) => {
     const [settings, setSettings] = useState({
       quizType: 'practice',
       timeLimit: null,
@@ -613,6 +613,11 @@ function App() {
     });
 
     const handleStart = () => {
+      // Check if premium features are being used
+      if (isPremium && (settings.quizType !== 'practice' || settings.questionCount > 5)) {
+        setShowPaymentDialog(true);
+        return;
+      }
       onStart({ ...settings, areaId });
     };
 
@@ -622,6 +627,7 @@ function App() {
           <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
             <Zap className="mr-2 h-4 w-4" />
             Advanced Quiz
+            {isPremium && <Crown className="ml-2 h-3 w-3" />}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
@@ -640,9 +646,24 @@ function App() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="practice">Practice Quiz</SelectItem>
-                  <SelectItem value="adaptive">Adaptive Difficulty</SelectItem>
-                  <SelectItem value="timed">Timed Challenge</SelectItem>
-                  <SelectItem value="nclex_simulation">NCLEX Simulation</SelectItem>
+                  <SelectItem value="adaptive" disabled={isPremium}>
+                    <div className="flex items-center">
+                      Adaptive Difficulty
+                      {isPremium && <Crown className="ml-2 h-3 w-3 text-yellow-500" />}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="timed" disabled={isPremium}>
+                    <div className="flex items-center">
+                      Timed Challenge
+                      {isPremium && <Crown className="ml-2 h-3 w-3 text-yellow-500" />}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="nclex_simulation" disabled={isPremium}>
+                    <div className="flex items-center">
+                      NCLEX Simulation
+                      {isPremium && <Crown className="ml-2 h-3 w-3 text-yellow-500" />}
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -655,10 +676,30 @@ function App() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="5">5 Questions</SelectItem>
-                  <SelectItem value="10">10 Questions</SelectItem>
-                  <SelectItem value="15">15 Questions</SelectItem>
-                  <SelectItem value="25">25 Questions</SelectItem>
-                  <SelectItem value="50">50 Questions</SelectItem>
+                  <SelectItem value="10" disabled={isPremium}>
+                    <div className="flex items-center">
+                      10 Questions
+                      {isPremium && <Crown className="ml-2 h-3 w-3 text-yellow-500" />}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="15" disabled={isPremium}>
+                    <div className="flex items-center">
+                      15 Questions
+                      {isPremium && <Crown className="ml-2 h-3 w-3 text-yellow-500" />}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="25" disabled={isPremium}>
+                    <div className="flex items-center">
+                      25 Questions
+                      {isPremium && <Crown className="ml-2 h-3 w-3 text-yellow-500" />}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="50" disabled={isPremium}>
+                    <div className="flex items-center">
+                      50 Questions
+                      {isPremium && <Crown className="ml-2 h-3 w-3 text-yellow-500" />}
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -680,8 +721,27 @@ function App() {
               </div>
             )}
 
+            {isPremium && (
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-3">
+                <div className="flex items-center mb-2">
+                  <Crown className="h-4 w-4 text-yellow-600 mr-2" />
+                  <span className="text-sm font-medium text-yellow-800">Premium Features</span>
+                </div>
+                <p className="text-xs text-yellow-700">
+                  Upgrade to unlock advanced quiz modes, unlimited questions, and detailed analytics.
+                </p>
+              </div>
+            )}
+
             <Button onClick={handleStart} className="w-full">
-              Start Quiz
+              {isPremium && (settings.quizType !== 'practice' || settings.questionCount > 5) ? (
+                <>
+                  <Crown className="mr-2 h-4 w-4" />
+                  Upgrade to Start
+                </>
+              ) : (
+                'Start Quiz'
+              )}
             </Button>
           </div>
         </DialogContent>
