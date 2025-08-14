@@ -516,6 +516,7 @@ class NursePrepAPITester:
         test_results.append(("Flashcards", self.test_flashcards()))
         test_results.append(("Spaced Repetition", self.test_spaced_repetition()))
         test_results.append(("Advanced Quiz System", self.test_advanced_quiz()))
+        test_results.append(("Payment System", self.test_payment_system()))
         test_results.append(("Statistics", self.test_statistics()))
         
         # Print summary
