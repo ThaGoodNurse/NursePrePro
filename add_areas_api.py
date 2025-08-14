@@ -2,7 +2,7 @@
 import requests
 import json
 
-BASE_URL = "https://nurseprep-1.preview.emergentagent.com"
+BASE_URL = "https://med-study-hub-2.preview.emergentagent.com"
 
 # New study areas to add
 new_areas = [
