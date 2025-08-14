@@ -8,7 +8,7 @@ import { Separator } from './components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
-import { BookOpen, Brain, Trophy, Target, ArrowRight, CheckCircle, XCircle, RotateCcw, RefreshCw, Eye, EyeOff, Volume2, Clock, Timer, Zap, Star, TrendingUp, Calendar } from 'lucide-react';
+import { BookOpen, Brain, Trophy, Target, ArrowRight, CheckCircle, XCircle, RotateCcw, RefreshCw, Eye, EyeOff, Volume2, Clock, Timer, Zap, Star, TrendingUp, Calendar, CreditCard, Crown, Gift } from 'lucide-react';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
