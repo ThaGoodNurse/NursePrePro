@@ -445,11 +445,18 @@ function App() {
             <div className="bg-blue-600 p-3 rounded-full mr-4">
               <Brain className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800">NursePrep Pro</h1>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800">NursePrep Pro™</h1>
+              <p className="text-xs text-gray-500 mt-1">© 2025 NursePrep Pro. All rights reserved.</p>
+            </div>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Master NCLEX-RN with adaptive quizzes, spaced repetition flashcards, and comprehensive analytics
           </p>
+          <div className="mt-4 text-xs text-gray-500">
+            <p>NCLEX-RN® is a registered trademark of NCSBN. Not affiliated with NCSBN.</p>
+            <p>Educational use only - Not medical advice</p>
+          </div>
         </div>
 
         {/* Enhanced Stats Overview */}
