@@ -488,6 +488,116 @@ function App() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const PaymentDialog = () => (
+    <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-center mb-2">
+            Choose Your Plan
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            Unlock premium features and master your NCLEX-RN preparation
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          {Object.entries(subscriptionPackages).map(([packageId, packageInfo]) => {
+            const isPopular = packageId === 'annual';
+            const isFree = packageInfo.amount === 0;
+            
+            return (
+              <Card key={packageId} className={`relative cursor-pointer transition-all hover:shadow-md ${
+                isPopular ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-200'
+              }`}>
+                {isPopular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-blue-500 text-white px-3 py-1">
+                      <Star className="w-3 h-3 mr-1" />
+                      Most Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">{packageInfo.name}</h3>
+                      <p className="text-sm text-gray-600">{packageInfo.description}</p>
+                    </div>
+                    <div className="text-right">
+                      {isFree ? (
+                        <div className="text-2xl font-bold text-green-600">FREE</div>
+                      ) : (
+                        <>
+                          <div className="text-2xl font-bold">${packageInfo.amount}</div>
+                          <div className="text-sm text-gray-500">
+                            {packageId === 'monthly' && '/month'}
+                            {packageId === 'annual' && '/year'}
+                            {packageId === 'lifetime' && 'one-time'}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      Unlimited practice questions
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      Advanced analytics & progress tracking
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      Spaced repetition flashcards
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      Adaptive difficulty engine
+                    </div>
+                    {!isFree && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                        Priority customer support
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Button
+                    onClick={() => initiatePayment(packageId)}
+                    disabled={paymentLoading}
+                    className={`w-full ${
+                      isPopular 
+                        ? 'bg-blue-600 hover:bg-blue-700' 
+                        : isFree 
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-gray-600 hover:bg-gray-700'
+                    } text-white`}
+                  >
+                    {paymentLoading ? (
+                      'Processing...'
+                    ) : isFree ? (
+                      'Start Free Trial'
+                    ) : (
+                      'Subscribe Now'
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+        
+        <div className="text-center text-xs text-gray-500 mt-4">
+          <p>Secure payment powered by Stripe • Cancel anytime</p>
+          <p>30-day money-back guarantee</p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   const QuizSettingsDialog = ({ areaId, areaName, onStart }) => {
     const [settings, setSettings] = useState({
       quizType: 'practice',
