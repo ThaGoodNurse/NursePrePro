@@ -8,6 +8,9 @@ import uuid
 from datetime import datetime, timedelta
 import uvicorn
 
+# Stripe integration imports
+from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
+
 # Environment variables
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.environ.get("DB_NAME", "nurseprep_db")
