@@ -75,6 +75,9 @@ function App() {
     fetchFlashcardSets();
     fetchUserStats();
     fetchFlashcardStats();
+    fetchSubscriptionStatus();
+    fetchSubscriptionPackages();
+    checkPaymentReturn();
   }, []);
 
   // Timer effect for quizzes
