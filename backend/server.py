@@ -345,6 +345,76 @@ async def startup_event():
                     "description": "Pregnancy, childbirth, and pediatric care",
                     "color": "#EC4899",
                     "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Critical Care",
+                    "description": "Intensive care unit nursing and life-threatening conditions",
+                    "color": "#DC2626",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Leadership",
+                    "description": "Nursing leadership, management, and professional development",
+                    "color": "#7C3AED",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Oncology/Hematology",
+                    "description": "Cancer care and blood disorder management",
+                    "color": "#DB2777",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Burn Wound Care",
+                    "description": "Assessment and treatment of burn injuries",
+                    "color": "#EA580C",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Hospice",
+                    "description": "End-of-life care and palliative nursing",
+                    "color": "#6B7280",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Cardiac",
+                    "description": "Cardiovascular nursing and heart conditions",
+                    "color": "#B91C1C",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Gastrointestinal",
+                    "description": "Digestive system disorders and GI nursing care",
+                    "color": "#059669",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Renal",
+                    "description": "Kidney function, dialysis, and renal nursing",
+                    "color": "#0284C7",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Stem Cell",
+                    "description": "Stem cell therapy and bone marrow transplant nursing",
+                    "color": "#7C2D12",
+                    "question_count": 0
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Transplant",
+                    "description": "Organ transplantation and post-transplant care",
+                    "color": "#15803D",
+                    "question_count": 0
                 }
             ]
             study_areas_collection.insert_many(sample_areas)
