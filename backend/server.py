@@ -1575,5 +1575,8 @@ async def startup_event():
     except Exception as e:
         print(f"Error initializing sample data: {e}")
 
+# Vercel handler
+app = app
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
