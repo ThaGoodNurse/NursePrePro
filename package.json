@@ -1,0 +1,13 @@
+{
+  "name": "nurseprep-pro",
+  "version": "1.0.0",
+  "description": "NursePrep Pro - Advanced NCLEX Study Application",
+  "scripts": {
+    "build": "cd frontend && yarn build",
+    "start": "cd frontend && yarn start",
+    "dev": "cd frontend && yarn start"
+  },
+  "keywords": ["nursing", "nclex", "study", "healthcare", "education"],
+  "author": "NursePrep Pro Team",
+  "license": "UNLICENSED"
+}
