@@ -535,11 +535,10 @@ async def get_study_areas():
 
 @app.get("/api/study-areas/{area_id}/questions", response_model=List[Question])
 async def get_questions_by_area(area_id: str):
-    # Filter questions by study area (in a real database, this would be a query)
+    """Get questions for a specific study area"""
     area_questions = []
     for question in questions_db.values():
-        # For demo, assign questions to fundamentals area
-        if area_id == "fundamentals":
+        if hasattr(question, 'study_area_id') and question.study_area_id == area_id:
             area_questions.append(question)
     return area_questions
 
