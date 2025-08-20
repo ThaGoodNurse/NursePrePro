@@ -874,7 +874,7 @@ function App() {
                 </Badge>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {studyAreas.map((area) => (
+                {(studyAreas || []).map((area) => (
                   <Card key={area.id} className="bg-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <CardHeader>
                       <div className="flex items-center justify-between">
