@@ -254,7 +254,7 @@ async def get_flashcard_sets():
         if flashcard.set_name not in sets:
             sets[flashcard.set_name] = []
         sets[flashcard.set_name].append(flashcard.dict())
-    return sets
+    return {"flashcard_sets": sets}
 
 @app.get("/api/flashcards/sets") 
 async def get_flashcard_sets_alt():
