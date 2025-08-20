@@ -246,14 +246,20 @@ async def get_questions_by_area(area_id: str):
 async def get_flashcards():
     return list(flashcards_db.values())
 
-@app.get("/api/flashcards/sets")
+@app.get("/api/flashcard-sets")
 async def get_flashcard_sets():
+    """Get flashcard sets (frontend expects this endpoint)"""
     sets = {}
     for flashcard in flashcards_db.values():
         if flashcard.set_name not in sets:
             sets[flashcard.set_name] = []
-        sets[flashcard.set_name].append(flashcard)
+        sets[flashcard.set_name].append(flashcard.dict())
     return sets
+
+@app.get("/api/flashcards/sets") 
+async def get_flashcard_sets_alt():
+    """Alternative endpoint for flashcard sets"""
+    return await get_flashcard_sets()
 
 # User and Progress Endpoints (Simplified for demo)
 @app.post("/api/submit-quiz")
