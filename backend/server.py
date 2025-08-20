@@ -250,10 +250,12 @@ def initialize_sample_data():
     for area_data in study_areas:
         study_areas_db[area_data["id"]] = StudyArea(**area_data)
     
-    # Sample Questions
+    # Comprehensive Sample Questions across multiple study areas
     sample_questions = [
+        # Fundamentals of Nursing
         {
-            "id": "q1",
+            "id": "fund_q1",
+            "study_area_id": "fundamentals",
             "question_text": "What is the most important principle when administering medications?",
             "question_type": "multiple_choice",
             "options": [
@@ -268,7 +270,8 @@ def initialize_sample_data():
             "nclex_category": "Safe and Effective Care Environment"
         },
         {
-            "id": "q2", 
+            "id": "fund_q2", 
+            "study_area_id": "fundamentals",
             "question_text": "Which vital sign should be assessed first in a patient experiencing chest pain?",
             "question_type": "multiple_choice",
             "options": [
@@ -280,6 +283,128 @@ def initialize_sample_data():
             "correct_answer_id": "b",
             "explanation": "Blood pressure should be assessed first as chest pain may indicate cardiac compromise affecting circulation.",
             "difficulty_level": 3,
+            "nclex_category": "Physiological Integrity"
+        },
+        {
+            "id": "fund_q3",
+            "study_area_id": "fundamentals", 
+            "question_text": "A nurse is preparing to insert a urinary catheter. What is the priority action?",
+            "question_type": "multiple_choice",
+            "options": [
+                {"id": "a", "text": "Gather all equipment", "is_correct": False},
+                {"id": "b", "text": "Explain procedure to patient", "is_correct": False},
+                {"id": "c", "text": "Perform hand hygiene", "is_correct": True},
+                {"id": "d", "text": "Position the patient", "is_correct": False}
+            ],
+            "correct_answer_id": "c",
+            "explanation": "Hand hygiene is the first and most important step in any sterile procedure to prevent infection.",
+            "difficulty_level": 2,
+            "nclex_category": "Safe and Effective Care Environment"
+        },
+        
+        # Pharmacology
+        {
+            "id": "pharm_q1",
+            "study_area_id": "pharmacology",
+            "question_text": "A patient is prescribed digoxin 0.25mg daily. Which finding would require the nurse to hold the medication?",
+            "question_type": "multiple_choice",
+            "options": [
+                {"id": "a", "text": "Blood pressure 130/80 mmHg", "is_correct": False},
+                {"id": "b", "text": "Heart rate 55 bpm", "is_correct": True},
+                {"id": "c", "text": "Potassium 4.2 mEq/L", "is_correct": False},
+                {"id": "d", "text": "Respiratory rate 18/min", "is_correct": False}
+            ],
+            "correct_answer_id": "b",
+            "explanation": "Digoxin should be held if heart rate is less than 60 bpm due to risk of further bradycardia.",
+            "difficulty_level": 3,
+            "nclex_category": "Physiological Integrity"
+        },
+        {
+            "id": "pharm_q2",
+            "study_area_id": "pharmacology",
+            "question_text": "Which medication requires monitoring of INR levels?",
+            "question_type": "multiple_choice", 
+            "options": [
+                {"id": "a", "text": "Heparin", "is_correct": False},
+                {"id": "b", "text": "Warfarin", "is_correct": True},
+                {"id": "c", "text": "Aspirin", "is_correct": False},
+                {"id": "d", "text": "Clopidogrel", "is_correct": False}
+            ],
+            "correct_answer_id": "b",
+            "explanation": "Warfarin requires regular INR monitoring to ensure therapeutic anticoagulation levels.",
+            "difficulty_level": 2,
+            "nclex_category": "Physiological Integrity"
+        },
+        
+        # Medical-Surgical
+        {
+            "id": "medsurg_q1",
+            "study_area_id": "med-surg",
+            "question_text": "A post-operative patient reports severe incisional pain rated 8/10. What is the nurse's priority action?",
+            "question_type": "multiple_choice",
+            "options": [
+                {"id": "a", "text": "Reassess pain in 30 minutes", "is_correct": False},
+                {"id": "b", "text": "Administer prescribed analgesic", "is_correct": True},
+                {"id": "c", "text": "Apply ice to incision", "is_correct": False},
+                {"id": "d", "text": "Document the pain level", "is_correct": False}
+            ],
+            "correct_answer_id": "b",
+            "explanation": "Severe post-operative pain requires immediate intervention with prescribed analgesics to provide relief.",
+            "difficulty_level": 2,
+            "nclex_category": "Physiological Integrity"
+        },
+        
+        # Critical Care
+        {
+            "id": "critical_q1",
+            "study_area_id": "critical-care",
+            "question_text": "A patient in the ICU has a blood pressure of 70/40 mmHg and heart rate of 120 bpm. What condition should the nurse suspect?",
+            "question_type": "multiple_choice",
+            "options": [
+                {"id": "a", "text": "Hypertensive crisis", "is_correct": False},
+                {"id": "b", "text": "Cardiogenic shock", "is_correct": True},
+                {"id": "c", "text": "Respiratory failure", "is_correct": False},
+                {"id": "d", "text": "Diabetic ketoacidosis", "is_correct": False}
+            ],
+            "correct_answer_id": "b",
+            "explanation": "Hypotension with tachycardia indicates possible cardiogenic shock requiring immediate intervention.",
+            "difficulty_level": 4,
+            "nclex_category": "Physiological Integrity"
+        },
+        
+        # Maternal-Child Health
+        {
+            "id": "maternity_q1", 
+            "study_area_id": "maternal-child",
+            "question_text": "A pregnant woman at 38 weeks gestation reports decreased fetal movement. What is the nurse's priority action?",
+            "question_type": "multiple_choice",
+            "options": [
+                {"id": "a", "text": "Schedule routine follow-up", "is_correct": False},
+                {"id": "b", "text": "Perform non-stress test", "is_correct": True},
+                {"id": "c", "text": "Reassure patient this is normal", "is_correct": False},
+                {"id": "d", "text": "Document the concern", "is_correct": False}
+            ],
+            "correct_answer_id": "b",
+            "explanation": "Decreased fetal movement requires immediate assessment with non-stress test to evaluate fetal well-being.",
+            "difficulty_level": 3,
+            "nclex_category": "Physiological Integrity"
+        },
+        
+        # Cardiac Nursing
+        {
+            "id": "cardiac_q1",
+            "study_area_id": "cardiac",
+            "question_text": "A patient with heart failure is prescribed furosemide. Which lab value should be monitored closely?",
+            "question_type": "multiple_choice",
+            "options": [
+                {"id": "a", "text": "Hemoglobin", "is_correct": False},
+                {"id": "b", "text": "Potassium", "is_correct": True},
+                {"id": "c", "text": "Glucose", "is_correct": False},
+                {"id": "d", "text": "Protein", "is_correct": False}
+            ],
+            "correct_answer_id": "b",
+            "explanation": "Furosemide causes potassium loss, requiring close monitoring to prevent dangerous hypokalemia.",
+            "difficulty_level": 2,
             "nclex_category": "Physiological Integrity"
         }
     ]
