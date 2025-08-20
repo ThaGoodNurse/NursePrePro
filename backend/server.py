@@ -254,7 +254,21 @@ async def get_flashcard_sets():
         if flashcard.set_name not in sets:
             sets[flashcard.set_name] = []
         sets[flashcard.set_name].append(flashcard.dict())
-    return {"flashcard_sets": sets}
+    
+    # Convert to array format that frontend expects
+    formatted_sets = []
+    for set_name, cards in sets.items():
+        formatted_sets.append({
+            "id": set_name.lower().replace(" ", "_"),
+            "name": set_name,
+            "description": f"Master essential {set_name.lower()} terms and definitions",
+            "card_count": len(cards),
+            "color": "#3b82f6",  # Blue color for all sets
+            "spaced_repetition_enabled": True,
+            "cards": cards
+        })
+    
+    return {"flashcard_sets": formatted_sets}
 
 @app.get("/api/flashcards/sets") 
 async def get_flashcard_sets_alt():
