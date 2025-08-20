@@ -95,54 +95,60 @@ function App() {
   const fetchStudyAreas = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/study-areas`);
-      setStudyAreas(response.data.study_areas);
+      setStudyAreas(response.data.study_areas || []);
     } catch (error) {
       console.error('Error fetching study areas:', error);
+      setStudyAreas([]);
     }
   };
 
   const fetchFlashcardSets = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/flashcard-sets`);
-      setFlashcardSets(response.data.flashcard_sets);
+      setFlashcardSets(response.data.flashcard_sets || {});
     } catch (error) {
       console.error('Error fetching flashcard sets:', error);
+      setFlashcardSets({});
     }
   };
 
   const fetchUserStats = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/stats`);
-      setUserStats(response.data);
+      setUserStats(response.data || {});
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setUserStats({});
     }
   };
 
   const fetchFlashcardStats = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/flashcards/stats`);
-      setFlashcardStats(response.data);
+      setFlashcardStats(response.data || {});
     } catch (error) {
       console.error('Error fetching flashcard stats:', error);
+      setFlashcardStats({});
     }
   };
 
   const fetchSubscriptionStatus = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/subscription/status`);
-      setSubscriptionStatus(response.data);
+      setSubscriptionStatus(response.data || {});
     } catch (error) {
       console.error('Error fetching subscription status:', error);
+      setSubscriptionStatus({});
     }
   };
 
   const fetchSubscriptionPackages = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/packages`);
-      setSubscriptionPackages(response.data.packages);
+      setSubscriptionPackages(response.data.packages || []);
     } catch (error) {
       console.error('Error fetching subscription packages:', error);
+      setSubscriptionPackages([]);
     }
   };
 
