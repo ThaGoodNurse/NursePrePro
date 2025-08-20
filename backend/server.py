@@ -352,6 +352,64 @@ async def get_analytics():
         ]
     }
 
+@app.get("/api/stats")
+async def get_stats():
+    """Get user stats (demo data)"""
+    return {
+        "total_quizzes": 3,
+        "average_score": 16.7,
+        "total_questions": 10,
+        "correct_answers": 5,
+        "study_streak": 3,
+        "last_activity": datetime.now().isoformat()
+    }
+
+@app.get("/api/flashcards/stats") 
+async def get_flashcard_stats():
+    """Get flashcard statistics (demo data)"""
+    return {
+        "cards_studied": 2,
+        "cards_mastered": 2,
+        "cards_learning": 0,
+        "cards_new": 0,
+        "study_streak": 1,
+        "total_reviews": 5,
+        "mastery_percentage": 100.0
+    }
+
+@app.get("/api/subscription/status")
+async def get_detailed_subscription_status():
+    """Get detailed subscription status (demo)"""
+    return {
+        "tier": "free",
+        "status": "active", 
+        "trial_days_remaining": None,
+        "can_upgrade": True,
+        "features": ["Basic quizzes", "Limited flashcards"],
+        "billing_cycle": None,
+        "next_billing_date": None
+    }
+
+@app.get("/api/packages")
+async def get_packages():
+    """Get available packages/plans"""
+    return [
+        {
+            "id": "monthly",
+            "name": "Monthly Premium", 
+            "price": 9.99,
+            "interval": "month",
+            "features": ["All study areas", "Unlimited quizzes", "Advanced analytics"]
+        },
+        {
+            "id": "annual",
+            "name": "Annual Premium",
+            "price": 79.99, 
+            "interval": "year",
+            "features": ["All study areas", "Unlimited quizzes", "Advanced analytics", "Save 33%"]
+        }
+    ]
+
 # Subscription/Payment Endpoints
 @app.get("/api/subscription-plans", response_model=List[SubscriptionPlan])
 async def get_subscription_plans():
