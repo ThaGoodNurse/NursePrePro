@@ -849,10 +849,10 @@ async def start_advanced_quiz(request: dict):
     # Create quiz session
     quiz_id = str(uuid.uuid4())
     
-    # Get questions for the study area
+    # Get questions for the specific study area
     quiz_questions = []
     for question in questions_db.values():
-        if study_area == "fundamentals":  # Demo: only fundamentals has questions
+        if hasattr(question, 'study_area_id') and question.study_area_id == study_area:
             quiz_questions.append(question)
     
     return {
