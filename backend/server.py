@@ -662,14 +662,16 @@ async def review_flashcard(review: FlashcardReview):
 async def get_analytics():
     """Get user analytics (demo data)"""
     return {
-        "total_quizzes": 3,
-        "quiz_average": 16.7,
-        "cards_studied": 2,
-        "card_mastery": 100.0,
+        "total_quizzes": 15,
+        "quiz_average": 78.3,
+        "cards_studied": 16,
+        "card_mastery": 75.0,
         "recent_sessions": [
-            {"date": "2025-01-15", "score": 75.0, "questions": 4},
-            {"date": "2025-01-14", "score": 50.0, "questions": 2},
-            {"date": "2025-01-13", "score": 25.0, "questions": 4}
+            {"date": "2025-01-20", "score": 85.0, "questions": 8},
+            {"date": "2025-01-19", "score": 72.0, "questions": 6},
+            {"date": "2025-01-18", "score": 78.0, "questions": 10},
+            {"date": "2025-01-17", "score": 81.0, "questions": 7},
+            {"date": "2025-01-16", "score": 74.0, "questions": 9}
         ]
     }
 
