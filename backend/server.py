@@ -677,11 +677,11 @@ async def get_analytics():
 async def get_stats():
     """Get user stats (demo data)"""
     return {
-        "total_quizzes": 3,
-        "average_score": 16.7,
-        "total_questions": 10,
-        "correct_answers": 5,
-        "study_streak": 3,
+        "total_quizzes": 15,
+        "average_score": 78.3,
+        "total_questions": 45,
+        "correct_answers": 35,
+        "study_streak": 7,
         "last_activity": datetime.now().isoformat()
     }
 
@@ -689,13 +689,13 @@ async def get_stats():
 async def get_flashcard_stats():
     """Get flashcard statistics (demo data)"""
     return {
-        "cards_studied": 2,
-        "cards_mastered": 2,
-        "cards_learning": 0,
-        "cards_new": 0,
-        "study_streak": 1,
-        "total_reviews": 5,
-        "mastery_percentage": 100.0
+        "cards_studied": 16,
+        "cards_mastered": 12,
+        "cards_learning": 3,
+        "cards_new": 1,
+        "study_streak": 5,
+        "total_reviews": 28,
+        "mastery_percentage": 75.0
     }
 
 @app.get("/api/subscription/status")
