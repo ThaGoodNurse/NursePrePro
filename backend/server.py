@@ -412,21 +412,110 @@ def initialize_sample_data():
     for q_data in sample_questions:
         questions_db[q_data["id"]] = Question(**q_data)
     
-    # Sample Flashcards
+    # Comprehensive Flashcard Sets
     sample_flashcards = [
+        # Medical Terminology Essentials
         {
-            "id": "f1",
+            "id": "med_term_1",
             "set_name": "Medical Terminology Essentials",
             "term": "Tachycardia",
             "definition": "Rapid heart rate, typically over 100 beats per minute",
             "pronunciation": "tak-i-KAR-dee-ah"
         },
         {
-            "id": "f2",
+            "id": "med_term_2",
             "set_name": "Medical Terminology Essentials", 
             "term": "Bradycardia",
             "definition": "Slow heart rate, typically under 60 beats per minute",
             "pronunciation": "brad-i-KAR-dee-ah"
+        },
+        {
+            "id": "med_term_3",
+            "set_name": "Medical Terminology Essentials",
+            "term": "Hypertension", 
+            "definition": "High blood pressure, consistently above 140/90 mmHg",
+            "pronunciation": "hahy-per-TEN-shuhn"
+        },
+        {
+            "id": "med_term_4",
+            "set_name": "Medical Terminology Essentials",
+            "term": "Hypotension",
+            "definition": "Low blood pressure, typically below 90/60 mmHg", 
+            "pronunciation": "hahy-poh-TEN-shuhn"
+        },
+        {
+            "id": "med_term_5",
+            "set_name": "Medical Terminology Essentials",
+            "term": "Dyspnea",
+            "definition": "Difficulty breathing or shortness of breath",
+            "pronunciation": "DISP-nee-ah"
+        },
+        {
+            "id": "med_term_6",
+            "set_name": "Medical Terminology Essentials",
+            "term": "Apnea", 
+            "definition": "Temporary cessation of breathing",
+            "pronunciation": "AP-nee-ah"
+        },
+        
+        # Pharmacology Terms
+        {
+            "id": "pharm_1",
+            "set_name": "Pharmacology Fundamentals",
+            "term": "Agonist",
+            "definition": "A drug that binds to and activates a receptor to produce a response",
+            "pronunciation": "AG-uh-nist"
+        },
+        {
+            "id": "pharm_2", 
+            "set_name": "Pharmacology Fundamentals",
+            "term": "Antagonist",
+            "definition": "A drug that blocks or inhibits the action of another drug or natural substance",
+            "pronunciation": "an-TAG-uh-nist"
+        },
+        {
+            "id": "pharm_3",
+            "set_name": "Pharmacology Fundamentals",
+            "term": "Bioavailability",
+            "definition": "The fraction of an administered dose that reaches systemic circulation",
+            "pronunciation": "bahy-oh-uh-vey-luh-BIL-i-tee"
+        },
+        {
+            "id": "pharm_4",
+            "set_name": "Pharmacology Fundamentals", 
+            "term": "Half-life",
+            "definition": "Time required for the concentration of a drug to decrease by half",
+            "pronunciation": "HAF-lahyf"
+        },
+        
+        # Pathophysiology Terms  
+        {
+            "id": "patho_1",
+            "set_name": "Pathophysiology Basics",
+            "term": "Inflammation",
+            "definition": "Body's response to injury or infection, characterized by redness, swelling, heat, and pain",
+            "pronunciation": "in-fluh-MEY-shuhn"
+        },
+        {
+            "id": "patho_2",
+            "set_name": "Pathophysiology Basics",
+            "term": "Necrosis", 
+            "definition": "Death of cells or tissues due to disease or injury",
+            "pronunciation": "nuh-KROH-sis"
+        },
+        {
+            "id": "patho_3",
+            "set_name": "Pathophysiology Basics",
+            "term": "Ischemia",
+            "definition": "Insufficient blood supply to an organ or tissue",
+            "pronunciation": "is-KEE-mee-ah"
+        },
+        {
+            "id": "patho_4",
+            "set_name": "Pathophysiology Basics",
+            "term": "Edema",
+            "definition": "Swelling caused by excess fluid trapped in body tissues",
+            "pronunciation": "ih-DEE-mah"
         }
     ]
     
