@@ -24,8 +24,6 @@
     }
   ],
   "env": {
-    "MONGO_URL": "@mongo_url",
-    "DB_NAME": "@db_name",
     "STRIPE_API_KEY": "@stripe_api_key",
     "CORS_ORIGINS": "@cors_origins"
   },
