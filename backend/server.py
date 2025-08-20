@@ -399,7 +399,7 @@ async def get_detailed_subscription_status():
 @app.get("/api/packages")
 async def get_packages():
     """Get available packages/plans"""
-    return [
+    packages = [
         {
             "id": "monthly",
             "name": "Monthly Premium", 
@@ -415,6 +415,7 @@ async def get_packages():
             "features": ["All study areas", "Unlimited quizzes", "Advanced analytics", "Save 33%"]
         }
     ]
+    return {"packages": packages}
 
 # Subscription/Payment Endpoints
 @app.get("/api/subscription-plans", response_model=List[SubscriptionPlan])
