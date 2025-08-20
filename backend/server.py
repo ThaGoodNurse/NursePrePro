@@ -227,9 +227,9 @@ async def root():
     return {"message": "NursePrep Pro API - Database Free Version", "status": "running"}
 
 # Study Areas Endpoints
-@app.get("/api/study-areas", response_model=List[StudyArea])
+@app.get("/api/study-areas")
 async def get_study_areas():
-    return list(study_areas_db.values())
+    return {"study_areas": list(study_areas_db.values())}
 
 @app.get("/api/study-areas/{area_id}/questions", response_model=List[Question])
 async def get_questions_by_area(area_id: str):
