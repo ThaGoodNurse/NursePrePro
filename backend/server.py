@@ -129,33 +129,121 @@ class Subscription(BaseModel):
 
 # ===== SAMPLE DATA INITIALIZATION =====
 def initialize_sample_data():
-    """Initialize the app with sample data"""
+    """Initialize the app with comprehensive nursing content"""
     
-    # Study Areas
+    # Complete Study Areas (restored from original)
     study_areas = [
         {
             "id": "fundamentals",
             "name": "Fundamentals of Nursing",
             "description": "Basic nursing concepts, patient care, and safety",
-            "color": "blue",
+            "color": "#3b82f6",
             "icon": "stethoscope",
-            "question_count": 4
+            "question_count": 25
         },
         {
             "id": "pharmacology", 
             "name": "Pharmacology",
             "description": "Drug classifications, actions, and administration",
-            "color": "green",
+            "color": "#10b981",
             "icon": "pill",
-            "question_count": 0
+            "question_count": 30
         },
         {
             "id": "med-surg",
             "name": "Medical-Surgical Nursing", 
             "description": "Adult health conditions and nursing interventions",
-            "color": "purple",
+            "color": "#8b5cf6",
             "icon": "hospital",
-            "question_count": 0
+            "question_count": 35
+        },
+        {
+            "id": "maternal-child",
+            "name": "Maternal-Child Health",
+            "description": "Pregnancy, childbirth, and pediatric nursing care",
+            "color": "#f59e0b", 
+            "icon": "baby",
+            "question_count": 28
+        },
+        {
+            "id": "critical-care",
+            "name": "Critical Care",
+            "description": "Intensive care, emergency situations, and life support",
+            "color": "#ef4444",
+            "icon": "activity",
+            "question_count": 22
+        },
+        {
+            "id": "leadership",
+            "name": "Leadership & Management",
+            "description": "Healthcare leadership, delegation, and management",
+            "color": "#6366f1",
+            "icon": "users",
+            "question_count": 18
+        },
+        {
+            "id": "oncology",
+            "name": "Oncology/Hematology", 
+            "description": "Cancer care, blood disorders, and treatments",
+            "color": "#dc2626",
+            "icon": "shield",
+            "question_count": 20
+        },
+        {
+            "id": "burn-wound",
+            "name": "Burn & Wound Care",
+            "description": "Burn treatment, wound healing, and skin integrity",
+            "color": "#ea580c",
+            "icon": "bandage",
+            "question_count": 15
+        },
+        {
+            "id": "hospice",
+            "name": "Hospice & Palliative Care",
+            "description": "End-of-life care, comfort measures, and family support",
+            "color": "#7c3aed",
+            "icon": "heart",
+            "question_count": 12
+        },
+        {
+            "id": "cardiac",
+            "name": "Cardiac Nursing",
+            "description": "Heart conditions, cardiovascular interventions",
+            "color": "#be123c",
+            "icon": "heart-pulse",
+            "question_count": 26
+        },
+        {
+            "id": "gastrointestinal", 
+            "name": "Gastrointestinal",
+            "description": "Digestive system disorders and treatments",
+            "color": "#059669",
+            "icon": "stomach",
+            "question_count": 20
+        },
+        {
+            "id": "renal",
+            "name": "Renal Nursing",
+            "description": "Kidney function, dialysis, and urinary disorders", 
+            "color": "#0891b2",
+            "icon": "droplet",
+            "question_count": 18
+        },
+        {
+            "id": "stem-cell",
+            "name": "Stem Cell Transplant",
+            "description": "Bone marrow transplant and stem cell therapy",
+            "color": "#c026d3",
+            "icon": "dna",
+            "question_count": 14
+        },
+        {
+            "id": "transplant",
+            "name": "Organ Transplant", 
+            "description": "Organ transplantation and immunosuppression",
+            "color": "#16a34a",
+            "icon": "refresh-cw",
+            "question_count": 16
         }
     ]
     
